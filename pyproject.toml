@@ -1,0 +1,25 @@
+[project]
+name = "mem-tac-review"
+version = "0.1.0"
+description = "Testing and review evidence collection harness for MemTacToe lab implementations"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "pyyaml>=6.0.2",
+]
+
+[project.scripts]
+mem-tac-review = "mem_tac_review.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

@@ -1,1 +1,12 @@
 mem-tac-toe.md
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+reports/
+samples/**/bin/
+samples/**/*.o
