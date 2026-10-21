@@ -204,7 +204,7 @@ class PtySession:
         """Pace interaction until an observable boundary is reached.
 
         Pacing rules from spec:
-        - If turn_prompt is set and matched in target role's unread/recent output -> boundary reached.
+        - If turn_prompt is set and matched in target role's new output -> boundary reached.
         - If quiet-window settling interval (settling_ms) elapses with silence after some output -> boundary reached.
         - If all processes exit -> boundary reached (process exited).
         - If timeout_sec elapses -> timed out.
@@ -217,6 +217,7 @@ class PtySession:
 
         last_received_time: Optional[float] = None
         has_received_data = False
+        output_since_start: dict[str, str] = {role: "" for role in self.processes}
 
         target_proc = self.processes.get(target_role)
 
@@ -226,7 +227,9 @@ class PtySession:
             if not fds or self.are_all_dead():
                 # Read whatever remains
                 for proc in self.processes.values():
-                    proc.read_available()
+                    new_text = proc.read_available()
+                    if new_text:
+                        output_since_start[proc.role] += new_text
                 return True, "all processes exited"
 
             # Select on available file descriptors with small slice (20ms)
@@ -241,11 +244,11 @@ class PtySession:
                         data_read = True
                         last_received_time = now
                         has_received_data = True
+                        output_since_start[proc.role] += new_text
 
-            # Check prompt regex if configured
+            # Check prompt regex if configured on output received since start
             if prompt_re and target_proc:
-                # Check recent unread output or tail of accumulated output
-                recent = target_proc.accumulated_output[-500:]
+                recent = output_since_start.get(target_role, "")
                 if prompt_re.search(recent):
                     return True, f"turn prompt matched '{turn_prompt}'"
 
@@ -257,7 +260,6 @@ class PtySession:
             # If no data has ever arrived, but settling time has passed since start
             # (e.g. for silent joiner or quick response)
             if not has_received_data and (now - start_time) >= max(settling_sec, 0.2):
-                # Wait at least settling_sec or 200ms
                 if (now - start_time) >= settling_sec:
                     return True, f"quiet window settled ({settling_ms}ms initial)"
 
