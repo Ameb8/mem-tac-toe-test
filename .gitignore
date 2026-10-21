@@ -10,3 +10,7 @@ build/
 reports/
 samples/**/bin/
 samples/**/*.o
+samples/**/player1
+samples/**/player2
+samples/**/game
+samples/**/broken
