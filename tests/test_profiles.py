@@ -115,7 +115,7 @@ def test_profile_adapter_launch_args() -> None:
 
     # CLI override on creator
     override_args = adapter.format_launch_args("p1", 4, cli_args_override=["bad_arg"])
-    assert override_args == ["./p1", "bad_arg"]
+    assert override_args == ["./p1", "-size", "bad_arg"]
 
 
 def test_profile_adapter_terminal_target() -> None:

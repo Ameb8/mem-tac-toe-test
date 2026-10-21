@@ -152,10 +152,17 @@ class ProfileAdapter:
         formatted: list[str] = []
 
         if cli_args_override is not None and role == self.profile.creator:
-            # Creator process receives the CLI argument override
-            # Find the command binary (first argument)
-            bin_name = raw_args[0] if raw_args else ""
-            return [bin_name] + list(cli_args_override)
+            has_placeholder = any("{N}" in arg for arg in raw_args)
+            if has_placeholder:
+                for arg in raw_args:
+                    if "{N}" in arg:
+                        for override_item in cli_args_override:
+                            formatted.append(arg.replace("{N}", override_item))
+                    else:
+                        formatted.append(arg)
+                return formatted
+            else:
+                return list(raw_args) + list(cli_args_override)
 
         for arg in raw_args:
             if "{N}" in arg:
