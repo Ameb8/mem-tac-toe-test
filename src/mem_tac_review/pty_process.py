@@ -215,11 +215,14 @@ class PtySession:
         settling_sec = settling_ms / 1000.0
         prompt_re = re.compile(turn_prompt) if turn_prompt else None
 
-        last_received_time: Optional[float] = None
-        has_received_data = False
-        output_since_start: dict[str, str] = {role: "" for role in self.processes}
-
         target_proc = self.processes.get(target_role)
+
+        # Initialize with unread output currently waiting in buffer
+        output_since_start: dict[str, str] = {
+            role: proc.unread_output for role, proc in self.processes.items()
+        }
+        has_received_data = any(len(txt) > 0 for txt in output_since_start.values())
+        last_received_time: Optional[float] = time.monotonic() if has_received_data else None
 
         while True:
             # Poll all processes
@@ -232,35 +235,38 @@ class PtySession:
                         output_since_start[proc.role] += new_text
                 return True, "all processes exited"
 
-            # Select on available file descriptors with small slice (20ms)
-            rlist, _, _ = select.select(fds, [], [], 0.02)
-            now = time.monotonic()
-
-            data_read = False
-            for proc in self.processes.values():
-                if proc.master_fd in rlist:
-                    new_text = proc.read_available()
-                    if new_text:
-                        data_read = True
-                        last_received_time = now
-                        has_received_data = True
-                        output_since_start[proc.role] += new_text
-
-            # Check prompt regex if configured on output received since start
+            # Check prompt regex if configured on unread output
             if prompt_re and target_proc:
                 recent = output_since_start.get(target_role, "")
                 if prompt_re.search(recent):
                     return True, f"turn prompt matched '{turn_prompt}'"
 
-            # Check quiet window settling
-            if has_received_data and last_received_time is not None:
-                if (now - last_received_time) >= settling_sec:
-                    return True, f"quiet window settled ({settling_ms}ms silence)"
+            # Select on available file descriptors with small slice (20ms)
+            rlist, _, _ = select.select(fds, [], [], 0.02)
+            now = time.monotonic()
 
-            # If no data has ever arrived, but settling time has passed since start
-            # (e.g. for silent joiner or quick response)
-            if not has_received_data and (now - start_time) >= max(settling_sec, 0.2):
-                if (now - start_time) >= settling_sec:
+            for proc in self.processes.values():
+                if proc.master_fd in rlist:
+                    new_text = proc.read_available()
+                    if new_text:
+                        last_received_time = now
+                        has_received_data = True
+                        output_since_start[proc.role] += new_text
+
+            # Check prompt regex again after reading
+            if prompt_re and target_proc:
+                recent = output_since_start.get(target_role, "")
+                if prompt_re.search(recent):
+                    return True, f"turn prompt matched '{turn_prompt}'"
+
+            # Check quiet window settling (only if no prompt_re or if prompt_re not matched)
+            # If quiet window settling is configured without turn_prompt
+            if not prompt_re:
+                if has_received_data and last_received_time is not None:
+                    if (now - last_received_time) >= settling_sec:
+                        return True, f"quiet window settled ({settling_ms}ms silence)"
+
+                if not has_received_data and (now - start_time) >= max(settling_sec, 0.2):
                     return True, f"quiet window settled ({settling_ms}ms initial)"
 
             # Check timeout
