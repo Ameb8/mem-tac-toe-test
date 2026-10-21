@@ -1,0 +1,9 @@
+name: "timeout_submission"
+work_dir: "../samples/submission_timeout"
+topology: "single"
+launch_p1: ["python3", "hang.py"]
+creator: "p1"
+turn_prompt: "Enter move:"
+settling_ms: 100
+timeout_sec: 2.0
+session_timeout_sec: 5.0

@@ -1,0 +1,11 @@
+name: "custom_coords_submission"
+work_dir: "../samples/submission_custom_coords"
+topology: "single"
+launch_p1: ["python3", "game.py", "{N}"]
+creator: "p1"
+coord_base: 1
+coord_order: "row_col"
+input_format: "{r},{c}\n"
+turn_prompt: "Move:"
+settling_ms: 100
+timeout_sec: 5.0

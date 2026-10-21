@@ -1,0 +1,16 @@
+name: "dual_shm_submission"
+build_cmd: "make clean && make"
+work_dir: "../samples/submission_dual_shm"
+topology: "dual"
+launch_p1: ["./player1", "{N}"]
+launch_p2: ["./player2"]
+creator: "p1"
+starting_player: "p1"
+p1_mark: "X"
+p2_mark: "O"
+coord_base: 0
+coord_order: "row_col"
+input_format: "{r} {c}\n"
+turn_prompt: "enter move:"
+settling_ms: 100
+timeout_sec: 5.0

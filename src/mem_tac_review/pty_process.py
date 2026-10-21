@@ -235,11 +235,11 @@ class PtySession:
                         output_since_start[proc.role] += new_text
                 return True, "all processes exited"
 
-            # Check prompt regex if configured on unread output
-            if prompt_re and target_proc:
-                recent = output_since_start.get(target_role, "")
-                if prompt_re.search(recent):
-                    return True, f"turn prompt matched '{turn_prompt}'"
+            # Check prompt regex if configured on output received
+            if prompt_re:
+                for role, recent in output_since_start.items():
+                    if prompt_re.search(recent):
+                        return True, f"turn prompt matched '{turn_prompt}' on {role}"
 
             # Select on available file descriptors with small slice (20ms)
             rlist, _, _ = select.select(fds, [], [], 0.02)
@@ -254,19 +254,18 @@ class PtySession:
                         output_since_start[proc.role] += new_text
 
             # Check prompt regex again after reading
-            if prompt_re and target_proc:
-                recent = output_since_start.get(target_role, "")
-                if prompt_re.search(recent):
-                    return True, f"turn prompt matched '{turn_prompt}'"
+            if prompt_re:
+                for role, recent in output_since_start.items():
+                    if prompt_re.search(recent):
+                        return True, f"turn prompt matched '{turn_prompt}' on {role}"
 
-            # Check quiet window settling (only if no prompt_re or if prompt_re not matched)
-            # If quiet window settling is configured without turn_prompt
-            if not prompt_re:
-                if has_received_data and last_received_time is not None:
-                    if (now - last_received_time) >= settling_sec:
-                        return True, f"quiet window settled ({settling_ms}ms silence)"
+            # Check quiet window settling
+            if has_received_data and last_received_time is not None:
+                if (now - last_received_time) >= settling_sec:
+                    return True, f"quiet window settled ({settling_ms}ms silence)"
 
-                if not has_received_data and (now - start_time) >= max(settling_sec, 0.2):
+            if not has_received_data and (now - start_time) >= max(settling_sec, 0.2):
+                if not prompt_re or (now - start_time) >= settling_sec * 3:
                     return True, f"quiet window settled ({settling_ms}ms initial)"
 
             # Check timeout

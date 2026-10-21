@@ -1,0 +1,6 @@
+name: "build_fail_submission"
+build_cmd: "make clean && make"
+work_dir: "../samples/submission_build_fail"
+topology: "single"
+launch_p1: ["./broken"]
+creator: "p1"
