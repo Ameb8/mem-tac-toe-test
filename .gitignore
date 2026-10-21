@@ -3,3 +3,10 @@ build/
 reports/
 *.o
 *.a
+
+# Mock submission executables
+mock_submissions/dual_shm/player1
+mock_submissions/dual_shm/player2
+mock_submissions/hang/hang
+mock_submissions/single_fork/launcher
+mock_submissions/unbuildable/game

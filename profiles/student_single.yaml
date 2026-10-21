@@ -1,0 +1,17 @@
+name: "student_single"
+build_cmd: "make clean && make"
+work_dir: "mock_submissions/single_fork"
+
+topology: "single"
+launch_p1: ["./launcher", "{N}"]
+creator: "shared"
+starting_player: "p1"
+
+coord_base: 0
+coord_order: "row_col"
+input_format: "{r} {c}\n"
+
+turn_prompt: "move"
+settling_ms: 100
+timeout_sec: 5
+session_timeout_sec: 30

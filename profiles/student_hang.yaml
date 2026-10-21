@@ -1,0 +1,11 @@
+name: "student_hang"
+build_cmd: "make clean && make"
+work_dir: "mock_submissions/hang"
+
+topology: "single"
+launch_p1: ["./hang"]
+creator: "shared"
+
+timeout_sec: 2
+session_timeout_sec: 4
+settling_ms: 100

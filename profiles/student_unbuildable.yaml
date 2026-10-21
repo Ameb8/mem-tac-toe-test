@@ -1,0 +1,7 @@
+name: "student_unbuildable"
+build_cmd: "make"
+work_dir: "mock_submissions/unbuildable"
+
+topology: "single"
+launch_p1: ["./game"]
+creator: "shared"
