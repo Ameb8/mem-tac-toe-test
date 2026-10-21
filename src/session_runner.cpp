@@ -222,7 +222,7 @@ SessionResult SessionRunner::run_scenario(const Profile& profile, const Scenario
 
         if (nfds == 0) return false;
 
-        int ret = poll(pfds, nfds, timeout_ms);
+        (void)poll(pfds, nfds, timeout_ms);
         bool got_data = false;
 
         if (idx_p1 >= 0 && (pfds[idx_p1].revents & (POLLIN | POLLHUP | POLLERR))) {

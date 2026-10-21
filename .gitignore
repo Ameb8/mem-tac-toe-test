@@ -1,1 +1,5 @@
 mem-tac-toe.md
+build/
+reports/
+*.o
+*.a
