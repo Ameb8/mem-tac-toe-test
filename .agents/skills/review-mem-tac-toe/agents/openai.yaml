@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review MemTacToe Submission"
+  short_description: "Verify game correctness, rubric issues, and portability"
+  default_prompt: "Use $review-mem-tac-toe to review the specified submission in submissions/<student-name>/ and write its submission-review.md."
